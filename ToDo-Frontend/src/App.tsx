@@ -15,6 +15,7 @@ function App() {
             <div className="task">{task}</div>
           ))}
         </ul>
+        <button className="addTask">Add task </button>
       </div>
     </body>
   );
