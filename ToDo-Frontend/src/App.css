@@ -144,6 +144,18 @@ ul {
 .expandButton.expanded {
   transform: rotate(180deg);
 }
+.deleteButton {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  flex-shrink: 0;
+  color: #c2b8a5;
+}
+.deleteButton:hover {
+  background: none;
+  color: #b3261e;
+}
 .addTask {
   align-self: flex-start;
 }

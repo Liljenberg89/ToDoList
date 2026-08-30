@@ -4,6 +4,7 @@ import {
   faChevronDown,
   faCheck,
   faGripVertical,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   DndContext,
@@ -39,9 +40,10 @@ interface AddTaskProps {
 interface TaskItemProps {
   task: Task;
   onToggleDone: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-function TaskItem({ task, onToggleDone }: TaskItemProps) {
+function TaskItem({ task, onToggleDone, onDelete }: TaskItemProps) {
   const [expanded, setExpanded] = useState(false);
   const {
     attributes,
@@ -80,6 +82,16 @@ function TaskItem({ task, onToggleDone }: TaskItemProps) {
         </span>
         <span className="taskTime">{task.time}</span>
         <span className="taskTitle">{task.task}</span>
+        <button
+          className="deleteButton"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(task.id);
+          }}
+          aria-label="Ta bort uppgift"
+        >
+          <FontAwesomeIcon icon={faTrash} />
+        </button>
         <button
           className={expanded ? "expandButton expanded" : "expandButton"}
           onClick={(e) => {
@@ -194,6 +206,10 @@ function App() {
     setShowAddTask(false);
   };
 
+  const deleteTask = (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -220,7 +236,12 @@ function App() {
           >
             <ul>
               {tasks.map((task) => (
-                <TaskItem key={task.id} task={task} onToggleDone={toggleDone} />
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggleDone={toggleDone}
+                  onDelete={deleteTask}
+                />
               ))}
             </ul>
           </SortableContext>
