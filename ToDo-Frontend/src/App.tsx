@@ -1,6 +1,27 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faCheck,
+  faGripVertical,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import "./App.css";
 
 interface Task {
@@ -22,10 +43,38 @@ interface TaskItemProps {
 
 function TaskItem({ task, onToggleDone }: TaskItemProps) {
   const [expanded, setExpanded] = useState(false);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : "auto",
+  };
 
   return (
-    <li className={task.done ? "task done" : "task"}>
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={task.done ? "task done" : "task"}
+    >
       <div className="taskHeader" onClick={() => onToggleDone(task.id)}>
+        <button
+          className="dragHandle"
+          {...attributes}
+          {...listeners}
+          onClick={(e) => e.stopPropagation()}
+          aria-label="Dra för att ändra ordning"
+        >
+          <FontAwesomeIcon icon={faGripVertical} />
+        </button>
         <span className="doneIndicator" aria-hidden="true">
           {task.done && <FontAwesomeIcon icon={faCheck} />}
         </span>
@@ -127,6 +176,13 @@ function App() {
   ]);
   const [showAddTask, setShowAddTask] = useState<boolean>(false);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
   const toggleDone = (id: string) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
@@ -138,15 +194,37 @@ function App() {
     setShowAddTask(false);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setTasks((prev) => {
+      const oldIndex = prev.findIndex((t) => t.id === active.id);
+      const newIndex = prev.findIndex((t) => t.id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
+
   return (
     <div className="container">
       <div className="tasks">
-        <h1 className="appTitle">Mina uppgifter</h1>
-        <ul>
-          {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} onToggleDone={toggleDone} />
-          ))}
-        </ul>
+        <h1 className="appTitle">Att göra!</h1>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={tasks.map((task) => task.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul>
+              {tasks.map((task) => (
+                <TaskItem key={task.id} task={task} onToggleDone={toggleDone} />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
         <button
           className="addTask"
           onClick={() => setShowAddTask(!showAddTask)}
