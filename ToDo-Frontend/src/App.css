@@ -10,10 +10,6 @@ body {
 }
 ul,
 h1,
-h2,
-h3,
-h4,
-h5,
 p {
   margin: 0;
   padding: 0;
@@ -48,7 +44,6 @@ button:hover {
   font-family: "Fraunces", serif;
   font-size: 1.9rem;
   font-weight: 600;
-  color: #2e2a24;
 }
 ul {
   list-style-type: none;
@@ -90,19 +85,29 @@ ul {
   cursor: grabbing;
 }
 .doneIndicator {
+  appearance: none;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 17px;
   height: 17px;
   flex-shrink: 0;
+  padding: 0;
   border: 1.5px solid #b5502f;
   border-radius: 4px;
+  background-color: transparent;
   color: white;
   font-size: 0.6rem;
+  cursor: pointer;
+}
+.doneIndicator:hover {
+  background-color: rgba(181, 80, 47, 0.12);
 }
 .task.done .doneIndicator {
   background-color: #b5502f;
+}
+.task.done .doneIndicator:hover {
+  background-color: #96421f;
 }
 .taskTime {
   min-width: 40px;
@@ -116,7 +121,6 @@ ul {
   font-family: "Fraunces", serif;
   font-size: 1.05rem;
   font-weight: 600;
-  color: #2e2a24;
 }
 .task.done .taskTitle {
   color: #a49b8c;
@@ -176,7 +180,6 @@ ul {
   border-radius: 5px;
   font-size: 0.9rem;
   background-color: #fffdfa;
-  color: #2e2a24;
 }
 .addTaskForm input[type="text"]:focus,
 .addTaskForm input[type="time"]:focus {

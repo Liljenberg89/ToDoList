@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -77,9 +77,17 @@ function TaskItem({ task, onToggleDone, onDelete }: TaskItemProps) {
         >
           <FontAwesomeIcon icon={faGripVertical} />
         </button>
-        <span className="doneIndicator" aria-hidden="true">
+        <button
+          className="doneIndicator"
+          aria-pressed={task.done}
+          aria-label={task.done ? "Markera som ej klar" : "Markera som klar"}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleDone(task.id);
+          }}
+        >
           {task.done && <FontAwesomeIcon icon={faCheck} />}
-        </span>
+        </button>
         <span className="taskTime">{task.time}</span>
         <span className="taskTitle">{task.task}</span>
         <button
@@ -112,7 +120,7 @@ function AddTask({ onAdd }: AddTaskProps) {
   const emptyTask = { task: "", description: "", time: "" };
   const [newTask, setNewTask] = useState(emptyTask);
 
-  const addTask = (e: any) => {
+  const addTask = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     onAdd({ ...newTask, id: crypto.randomUUID(), done: false });
@@ -156,7 +164,7 @@ function AddTask({ onAdd }: AddTaskProps) {
 }
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>([
+  const [tasks, setTasks] = useState<Task[]>(() => [
     {
       id: crypto.randomUUID(),
       task: "Städa",
