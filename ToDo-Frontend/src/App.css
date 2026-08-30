@@ -39,6 +39,7 @@ button:hover {
 }
 ul {
   width: 400px;
+  list-style-type: none;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -52,5 +53,37 @@ ul {
 .task.done {
   background-color: rgb(180, 230, 190);
 }
+.taskHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.taskHeader h3 {
+  flex: 1;
+}
+.taskDescription {
+  margin-top: 10px;
+}
+.expandButton {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  transition: transform 0.15s ease;
+}
+.expandButton:hover {
+  background: none;
+  border: none;
+}
+.expandButton.expanded {
+  transform: rotate(180deg);
+}
 .addTask {
+}
+.timeInput::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.timeInput {
+  cursor: pointer;
 }

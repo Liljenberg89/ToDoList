@@ -1,4 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 
 interface Task {
@@ -11,6 +13,34 @@ interface Task {
 
 interface AddTaskProps {
   onAdd: (task: Task) => void;
+}
+
+interface TaskItemProps {
+  task: Task;
+  onToggleDone: (id: string) => void;
+}
+
+function TaskItem({ task, onToggleDone }: TaskItemProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <li className={task.done ? "task done" : "task"}>
+      <div className="taskHeader" onClick={() => onToggleDone(task.id)}>
+        <h5>{task.time}</h5>
+        <h3>{task.task}</h3>
+        <button
+          className={expanded ? "expandButton expanded" : "expandButton"}
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(!expanded);
+          }}
+        >
+          <FontAwesomeIcon icon={faChevronDown} />
+        </button>
+      </div>
+      {expanded && <p className="taskDescription">{task.description}</p>}
+    </li>
+  );
 }
 
 function AddTask({ onAdd }: AddTaskProps) {
@@ -47,9 +77,11 @@ function AddTask({ onAdd }: AddTaskProps) {
           }
         />
         <input
-          type="text"
-          placeholder="Time"
+          type="time"
+          lang="sv-SE"
+          className="timeInput"
           value={newTask.time}
+          onClick={(e) => e.currentTarget.showPicker?.()}
           onChange={(e) =>
             setNewTask((prev) => ({ ...prev, time: e.target.value }))
           }
@@ -88,16 +120,7 @@ function App() {
       <div className="tasks">
         <ul>
           {tasks.map((task) => (
-            <li
-              key={task.id}
-              className={task.done ? "task done" : "task"}
-              onClick={() => toggleDone(task.id)}
-            >
-              <h5> {task.time}</h5>
-              <h3>
-                <div>{task.task}</div>
-              </h3>
-            </li>
+            <TaskItem key={task.id} task={task} onToggleDone={toggleDone} />
           ))}
         </ul>
         <button
