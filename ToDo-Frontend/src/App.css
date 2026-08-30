@@ -47,6 +47,10 @@ ul {
   padding: 15px;
   background-color: rgb(197, 226, 252);
   border-radius: 3px;
+  cursor: pointer;
+}
+.task.done {
+  background-color: rgb(180, 230, 190);
 }
 .addTask {
 }
