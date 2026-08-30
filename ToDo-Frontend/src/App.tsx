@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 
 interface Task {
@@ -26,14 +26,18 @@ function TaskItem({ task, onToggleDone }: TaskItemProps) {
   return (
     <li className={task.done ? "task done" : "task"}>
       <div className="taskHeader" onClick={() => onToggleDone(task.id)}>
-        <h5>{task.time}</h5>
-        <h3>{task.task}</h3>
+        <span className="doneIndicator" aria-hidden="true">
+          {task.done && <FontAwesomeIcon icon={faCheck} />}
+        </span>
+        <span className="taskTime">{task.time}</span>
+        <span className="taskTitle">{task.task}</span>
         <button
           className={expanded ? "expandButton expanded" : "expandButton"}
           onClick={(e) => {
             e.stopPropagation();
             setExpanded(!expanded);
           }}
+          aria-label={expanded ? "Dölj beskrivning" : "Visa beskrivning"}
         >
           <FontAwesomeIcon icon={faChevronDown} />
         </button>
@@ -55,40 +59,38 @@ function AddTask({ onAdd }: AddTaskProps) {
   };
 
   return (
-    <div>
-      <form onSubmit={addTask}>
-        <input
-          type="text"
-          placeholder="Task"
-          minLength={3}
-          value={newTask.task}
-          required
-          onChange={(e) =>
-            setNewTask((prev) => ({ ...prev, task: e.target.value }))
-          }
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={newTask.description}
-          required
-          onChange={(e) =>
-            setNewTask((prev) => ({ ...prev, description: e.target.value }))
-          }
-        />
-        <input
-          type="time"
-          lang="sv-SE"
-          className="timeInput"
-          value={newTask.time}
-          onClick={(e) => e.currentTarget.showPicker?.()}
-          onChange={(e) =>
-            setNewTask((prev) => ({ ...prev, time: e.target.value }))
-          }
-        />
-        <input type="submit" value="Add task"></input>
-      </form>
-    </div>
+    <form className="addTaskForm" onSubmit={addTask}>
+      <input
+        type="text"
+        placeholder="Uppgift"
+        minLength={3}
+        value={newTask.task}
+        required
+        onChange={(e) =>
+          setNewTask((prev) => ({ ...prev, task: e.target.value }))
+        }
+      />
+      <input
+        type="text"
+        placeholder="Beskrivning"
+        value={newTask.description}
+        required
+        onChange={(e) =>
+          setNewTask((prev) => ({ ...prev, description: e.target.value }))
+        }
+      />
+      <input
+        type="time"
+        lang="sv-SE"
+        className="timeInput"
+        value={newTask.time}
+        onClick={(e) => e.currentTarget.showPicker?.()}
+        onChange={(e) =>
+          setNewTask((prev) => ({ ...prev, time: e.target.value }))
+        }
+      />
+      <button type="submit">Lägg till</button>
+    </form>
   );
 }
 
@@ -99,6 +101,27 @@ function App() {
       task: "Städa",
       description: "Städa rummet och toan",
       time: "14:00",
+      done: false,
+    },
+    {
+      id: crypto.randomUUID(),
+      task: "Handla mat",
+      description: "Köp mjölk, ägg och bröd till veckan",
+      time: "17:30",
+      done: false,
+    },
+    {
+      id: crypto.randomUUID(),
+      task: "Träna",
+      description: "30 minuter löpning eller styrketräning",
+      time: "07:00",
+      done: true,
+    },
+    {
+      id: crypto.randomUUID(),
+      task: "Plugga React",
+      description: "Gå igenom useState och komponenter en timme",
+      time: "20:00",
       done: false,
     },
   ]);
@@ -118,6 +141,7 @@ function App() {
   return (
     <div className="container">
       <div className="tasks">
+        <h1 className="appTitle">Mina uppgifter</h1>
         <ul>
           {tasks.map((task) => (
             <TaskItem key={task.id} task={task} onToggleDone={toggleDone} />
@@ -127,9 +151,9 @@ function App() {
           className="addTask"
           onClick={() => setShowAddTask(!showAddTask)}
         >
-          Add task{" "}
+          {showAddTask ? "Avbryt" : "+ Lägg till uppgift"}
         </button>
-        {!showAddTask ? "" : <AddTask onAdd={addTask} />}
+        {showAddTask && <AddTask onAdd={addTask} />}
       </div>
     </div>
   );

@@ -2,9 +2,11 @@ body {
   margin: 0;
   height: 100vh;
   width: 100vw;
-  background-color: rgb(253, 251, 251);
+  background-color: #f6f1ea;
   display: flex;
   justify-content: center;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #2e2a24;
 }
 ul,
 h1,
@@ -16,70 +18,145 @@ p {
   margin: 0;
   padding: 0;
 }
+button,
+input {
+  font-family: inherit;
+}
 
 button {
   width: fit-content;
-  padding: 10px 30px;
-  background-color: rgb(54, 117, 172);
-  border: solid rgb(31, 85, 121) 2px;
-  border-radius: 4px;
+  padding: 9px 20px;
+  background-color: #b5502f;
+  border: none;
+  border-radius: 6px;
   color: white;
+  font-weight: 500;
   cursor: pointer;
 }
 button:hover {
-  background-color: rgb(38, 68, 95);
-  border: solid rgb(70, 93, 109) 2px;
+  background-color: #96421f;
 }
+
 .tasks {
-  margin-top: 100px;
+  margin-top: 60px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: 70vw;
+  gap: 16px;
+  width: min(90vw, 480px);
+}
+.appTitle {
+  font-family: "Fraunces", serif;
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: #2e2a24;
 }
 ul {
-  width: 400px;
   list-style-type: none;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 .task {
-  padding: 15px;
-  background-color: rgb(197, 226, 252);
-  border-radius: 3px;
+  padding: 13px 16px;
+  background-color: #fffdfa;
+  border: 1px solid #e6dfd2;
+  border-radius: 6px;
   cursor: pointer;
+  transition: border-color 0.15s ease;
 }
-.task.done {
-  background-color: rgb(180, 230, 190);
+.task:hover {
+  border-color: #cfc4b0;
 }
 .taskHeader {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
-.taskHeader h3 {
+.doneIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  border: 1.5px solid #b5502f;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.6rem;
+}
+.task.done .doneIndicator {
+  background-color: #b5502f;
+}
+.taskTime {
+  min-width: 40px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #8a8175;
+}
+.taskTitle {
   flex: 1;
+  font-family: "Fraunces", serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #2e2a24;
+}
+.task.done .taskTitle {
+  color: #a49b8c;
+  text-decoration: line-through;
 }
 .taskDescription {
-  margin-top: 10px;
+  margin: 8px 0 0 29px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #6f6659;
 }
 .expandButton {
   appearance: none;
   background: none;
   border: none;
-  padding: 0;
-  color: inherit;
+  padding: 4px;
+  flex-shrink: 0;
+  color: #8a8175;
+  font-size: 0.8rem;
   transition: transform 0.15s ease;
 }
 .expandButton:hover {
   background: none;
-  border: none;
 }
 .expandButton.expanded {
   transform: rotate(180deg);
 }
 .addTask {
+  align-self: flex-start;
+}
+.addTaskForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background-color: #fffdfa;
+  border: 1px solid #e6dfd2;
+  border-radius: 6px;
+}
+.addTaskForm input[type="text"],
+.addTaskForm input[type="time"] {
+  box-sizing: border-box;
+  padding: 9px 11px;
+  border: 1px solid #ddd3c2;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  background-color: #fffdfa;
+  color: #2e2a24;
+}
+.addTaskForm input[type="text"]:focus,
+.addTaskForm input[type="time"]:focus {
+  outline: none;
+  border-color: #b5502f;
+  box-shadow: 0 0 0 3px rgba(181, 80, 47, 0.15);
+}
+.addTaskForm button {
+  align-self: flex-start;
 }
 .timeInput::-webkit-calendar-picker-indicator {
   display: none;
