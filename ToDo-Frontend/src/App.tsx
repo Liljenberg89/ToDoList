@@ -290,6 +290,8 @@ function App() {
         {error && <p className="errorMessage">{error}</p>}
         {loading ? (
           <p className="statusMessage">Laddar uppgifter…</p>
+        ) : tasks.length === 0 ? (
+          <p className="emptyMessage">Inget att göra just nu ☺</p>
         ) : (
           <DndContext
             sensors={sensors}

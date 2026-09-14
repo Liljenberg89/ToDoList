@@ -5,7 +5,7 @@ body {
   background-color: #f6f1ea;
   display: flex;
   justify-content: center;
-  font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: "Karla", system-ui, -apple-system, "Segoe UI", sans-serif;
   color: #2e2a24;
 }
 ul,
@@ -24,7 +24,7 @@ button {
   padding: 9px 20px;
   background-color: #b5502f;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   color: white;
   font-weight: 500;
   cursor: pointer;
@@ -52,10 +52,19 @@ button:hover {
 .errorMessage {
   padding: 9px 12px;
   border: 1px solid #e2b6ae;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: #fbeae7;
   color: #96421f;
   font-size: 0.85rem;
+}
+.emptyMessage {
+  padding: 24px 16px;
+  border: 1px dashed #ddd0ba;
+  border-radius: 10px;
+  text-align: center;
+  font-family: "Fraunces", serif;
+  font-size: 1rem;
+  color: #8a8175;
 }
 ul {
   list-style-type: none;
@@ -66,13 +75,17 @@ ul {
 .task {
   padding: 13px 16px;
   background-color: #fffdfa;
-  border: 1px solid #e6dfd2;
-  border-radius: 6px;
+  border: 1px solid #eee6d8;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(120, 92, 58, 0.06);
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .task:hover {
   border-color: #cfc4b0;
+  box-shadow: 0 4px 12px rgba(120, 92, 58, 0.1);
 }
 .taskHeader {
   display: flex;
@@ -181,15 +194,16 @@ ul {
   gap: 10px;
   padding: 16px;
   background-color: #fffdfa;
-  border: 1px solid #e6dfd2;
-  border-radius: 6px;
+  border: 1px solid #eee6d8;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(120, 92, 58, 0.06);
 }
 .addTaskForm input[type="text"],
 .addTaskForm input[type="time"] {
   box-sizing: border-box;
   padding: 9px 11px;
   border: 1px solid #ddd3c2;
-  border-radius: 5px;
+  border-radius: 7px;
   font-size: 0.9rem;
   background-color: #fffdfa;
 }
