@@ -5,7 +5,7 @@ body {
   background-color: #f6f1ea;
   display: flex;
   justify-content: center;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   color: #2e2a24;
 }
 ul,
