@@ -1,4 +1,4 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const taskSchema = new Schema(
   {
@@ -21,7 +21,5 @@ const taskSchema = new Schema(
     },
   },
 );
-
-export type TaskDocument = InferSchemaType<typeof taskSchema>;
 
 export default model("Task", taskSchema);
