@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -23,18 +23,19 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  fetchTasks,
+  createTask,
+  updateTask,
+  deleteTask as deleteTaskRequest,
+  reorderTasks,
+  type Task,
+  type NewTaskInput,
+} from "./api/tasks";
 import "./App.css";
 
-interface Task {
-  id: string;
-  task: string;
-  description: string;
-  time: string;
-  done: boolean;
-}
-
 interface AddTaskProps {
-  onAdd: (task: Task) => void;
+  onAdd: (task: NewTaskInput) => Promise<void>;
 }
 
 interface TaskItemProps {
@@ -119,12 +120,19 @@ function TaskItem({ task, onToggleDone, onDelete }: TaskItemProps) {
 function AddTask({ onAdd }: AddTaskProps) {
   const emptyTask = { task: "", description: "", time: "" };
   const [newTask, setNewTask] = useState(emptyTask);
+  const [submitting, setSubmitting] = useState(false);
 
-  const addTask = (e: FormEvent<HTMLFormElement>) => {
+  const addTask = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    onAdd({ ...newTask, id: crypto.randomUUID(), done: false });
-    setNewTask(emptyTask);
+    setSubmitting(true);
+    try {
+      await onAdd(newTask);
+      setNewTask(emptyTask);
+    } catch {
+      // Felet visas av föräldrakomponenten; behåll fälten så användaren kan försöka igen.
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -158,43 +166,41 @@ function AddTask({ onAdd }: AddTaskProps) {
           setNewTask((prev) => ({ ...prev, time: e.target.value }))
         }
       />
-      <button type="submit">Lägg till</button>
+      <button type="submit" disabled={submitting}>
+        {submitting ? "Lägger till…" : "Lägg till"}
+      </button>
     </form>
   );
 }
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>(() => [
-    {
-      id: crypto.randomUUID(),
-      task: "Städa",
-      description: "Städa rummet och toan",
-      time: "14:00",
-      done: false,
-    },
-    {
-      id: crypto.randomUUID(),
-      task: "Handla mat",
-      description: "Köp mjölk, ägg och bröd till veckan",
-      time: "17:30",
-      done: false,
-    },
-    {
-      id: crypto.randomUUID(),
-      task: "Träna",
-      description: "30 minuter löpning eller styrketräning",
-      time: "07:00",
-      done: true,
-    },
-    {
-      id: crypto.randomUUID(),
-      task: "Plugga React",
-      description: "Gå igenom useState och komponenter en timme",
-      time: "20:00",
-      done: false,
-    },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddTask, setShowAddTask] = useState<boolean>(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchTasks()
+      .then((data) => {
+        if (!cancelled) setTasks(data);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Kunde inte hämta uppgifter",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -204,28 +210,76 @@ function App() {
   );
 
   const toggleDone = (id: string) => {
+    const current = tasks.find((t) => t.id === id);
+    if (!current) return;
+    const nextDone = !current.done;
+
     setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+      prev.map((t) => (t.id === id ? { ...t, done: nextDone } : t)),
     );
+    setError(null);
+
+    updateTask(id, { done: nextDone }).catch((err: unknown) => {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, done: current.done } : t)),
+      );
+      setError(
+        err instanceof Error ? err.message : "Kunde inte uppdatera uppgiften",
+      );
+    });
   };
 
-  const addTask = (task: Task) => {
-    setTasks((prev) => [...prev, task]);
-    setShowAddTask(false);
+  const addTask = async (input: NewTaskInput) => {
+    setError(null);
+    try {
+      const created = await createTask(input);
+      setTasks((prev) => [...prev, created]);
+      setShowAddTask(false);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Kunde inte lägga till uppgiften",
+      );
+      throw err;
+    }
   };
 
   const deleteTask = (id: string) => {
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) return;
+    const removed = tasks[index];
+
     setTasks((prev) => prev.filter((t) => t.id !== id));
+    setError(null);
+
+    deleteTaskRequest(id).catch((err: unknown) => {
+      setTasks((prev) => {
+        const next = [...prev];
+        next.splice(index, 0, removed);
+        return next;
+      });
+      setError(
+        err instanceof Error ? err.message : "Kunde inte ta bort uppgiften",
+      );
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    setTasks((prev) => {
-      const oldIndex = prev.findIndex((t) => t.id === active.id);
-      const newIndex = prev.findIndex((t) => t.id === over.id);
-      return arrayMove(prev, oldIndex, newIndex);
+    const previous = tasks;
+    const oldIndex = previous.findIndex((t) => t.id === active.id);
+    const newIndex = previous.findIndex((t) => t.id === over.id);
+    const reordered = arrayMove(previous, oldIndex, newIndex);
+
+    setTasks(reordered);
+    setError(null);
+
+    reorderTasks(reordered.map((t) => t.id)).catch((err: unknown) => {
+      setTasks(previous);
+      setError(
+        err instanceof Error ? err.message : "Kunde inte spara ny ordning",
+      );
     });
   };
 
@@ -233,27 +287,32 @@ function App() {
     <div className="container">
       <div className="tasks">
         <h1 className="appTitle">Att göra!</h1>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={tasks.map((task) => task.id)}
-            strategy={verticalListSortingStrategy}
+        {error && <p className="errorMessage">{error}</p>}
+        {loading ? (
+          <p className="statusMessage">Laddar uppgifter…</p>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <ul>
-              {tasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  onToggleDone={toggleDone}
-                  onDelete={deleteTask}
-                />
-              ))}
-            </ul>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={tasks.map((task) => task.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ul>
+                {tasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onToggleDone={toggleDone}
+                    onDelete={deleteTask}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+        )}
         <button
           className="addTask"
           onClick={() => setShowAddTask(!showAddTask)}

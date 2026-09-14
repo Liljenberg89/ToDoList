@@ -45,6 +45,18 @@ button:hover {
   font-size: 1.9rem;
   font-weight: 600;
 }
+.statusMessage {
+  font-size: 0.9rem;
+  color: #8a8175;
+}
+.errorMessage {
+  padding: 9px 12px;
+  border: 1px solid #e2b6ae;
+  border-radius: 6px;
+  background-color: #fbeae7;
+  color: #96421f;
+  font-size: 0.85rem;
+}
 ul {
   list-style-type: none;
   display: flex;
